@@ -17,10 +17,11 @@ POSTGRES_PORT = os.getenv("POSTGRES_PORT")
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-pmf3^j*)*0felgb=zmtc80m&cp@s9z4y+hc$i&3_rssp*k4k&h'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+DEBUG = False
 
 ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0"]
 
@@ -34,7 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts'
+    'accounts',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
@@ -122,3 +124,10 @@ STATIC_URL = 'static/'
 # Account
 
 AUTH_USER_MODEL = 'accounts.Account'
+
+# DRF
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES":
+    ["rest_framework.authentication.TokenAuthentication"]
+}
