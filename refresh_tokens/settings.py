@@ -23,8 +23,13 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0"]
+ALLOWED_HOSTS = ["*"]
 
+RENDER_POSTGRES_DB=os.getenv("RENDER_POSTGRES_DB")
+RENDER_POSTGRES_USER=os.getenv("RENDER_POSTGRES_USER")
+RENDER_POSTGRES_PASSWORD=os.getenv("RENDER_POSTGRES_PASSWORD")
+RENDER_POSTGRES_HOST=os.getenv("RENDER_POSTGRES_HOST")
+RENDER_POSTGRES_PORT=os.getenv("RENDER_POSTGRES_PORT")
 
 # Application definition
 
@@ -36,13 +41,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'corsheaders',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -75,11 +83,11 @@ WSGI_APPLICATION = 'refresh_tokens.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': POSTGRES_DB,
-        'HOST': POSTGRES_HOST,
-        'USER': POSTGRES_USER,
-        'PASSWORD': POSTGRES_PASSWORD,
-        'PORT': POSTGRES_PORT
+        'NAME': RENDER_POSTGRES_DB,
+        'HOST': RENDER_POSTGRES_HOST,
+        'USER': RENDER_POSTGRES_USER,
+        'PASSWORD': RENDER_POSTGRES_PASSWORD,
+        'PORT': RENDER_POSTGRES_PORT
         
     }
 }
@@ -131,3 +139,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES":
     ["rest_framework.authentication.TokenAuthentication"]
 }
+
+# Cors
+
+CORS_ALLOW_ALL_ORIGINS = True
