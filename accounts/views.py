@@ -24,3 +24,9 @@ class LoginAccount(APIView): # View responsável por logar o usuário
         access_token = serializer.save()
 
         return Response({"access_token": access_token}, status=status.HTTP_200_OK)
+    
+class TestAuthentication(APIView): # Verifica se o usuário está logado
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        return Response({"message": "You are authenticated!"}, status=status.HTTP_200_OK) # Retorna mensagem caso o usuário esteja logado
