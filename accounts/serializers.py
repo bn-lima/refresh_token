@@ -10,7 +10,7 @@ class RegisterAccountSerializer(serializers.ModelSerializer): # Serializer respo
     
     class Meta:
         model = Account
-        fields = ("username", "password", "confirm_password")
+        fields = ("email", "password", "confirm_password")
 
         extra_kwargs = {
             "confirm_password": {
@@ -36,12 +36,12 @@ class RegisterAccountSerializer(serializers.ModelSerializer): # Serializer respo
         return user
     
 class LoginAccountSerializer(serializers.Serializer): # Serializer responsável por logar o usuário
-    username = serializers.CharField(max_length=150, required=True)
+    email = serializers.EmailField(max_length=350, required=True)
     password = serializers.CharField(max_length=128, required=True)
 
     def validate(self, data):
         
-        token_pair = authenticate_account(data.get("username"), data.get("password")) # Valida se existe um usuário com as credenciais enviadas
+        token_pair = authenticate_account(data.get("email"), data.get("password")) # Valida se existe um usuário com as credenciais enviadas
 
         if not token_pair: # Retorna erro caso não exista usuário
             raise serializers.ValidationError("Invalid credentials")
