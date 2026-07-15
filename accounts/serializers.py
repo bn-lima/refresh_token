@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import Account
 from .validators import PASSWORD_VALIDATOR
 from .services import authenticate_account
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 class RegisterAccountSerializer(serializers.ModelSerializer): # Serializer responsável por registrar um usuário
     confirm_password = serializers.CharField(max_length=128, required=True) # Campo para confirmar senha
@@ -39,13 +41,28 @@ class LoginAccountSerializer(serializers.Serializer): # Serializer responsável 
 
     def validate(self, data):
         
-        token = authenticate_account(data.get("username"), data.get("password")) # Valida se existe um usuário com as credenciais enviadas
+        token_pair = authenticate_account(data.get("username"), data.get("password")) # Valida se existe um usuário com as credenciais enviadas
 
-        if not token: # Retorna erro caso não exista usuário
+        if not token_pair: # Retorna erro caso não exista usuário
             raise serializers.ValidationError("Invalid credentials")
         
-        data["access_token"] = token.key
+        data["token_pair"] = token_pair
         return data
     
     def save(self, **kwargs): # Devolve token de acesso
-        return self.validated_data.get("access_token")
+        return self.validated_data.get("token_pair")
+    
+class RefreshTokenSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField(required=True)
+
+    def validate(self, data):
+        try:
+            refresh_token = RefreshToken(data.get("refresh_token"))
+        except TokenError:
+            raise serializers.ValidationError("Invalid or expired refresh_token")
+        
+        data["new_access_token"] = str(refresh_token.access_token)
+        return data
+    
+    def save(self, **kwargs):
+        return self.validated_data.get("new_access_token")
