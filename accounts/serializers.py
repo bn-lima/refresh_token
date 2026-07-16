@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Account
 from .validators import PASSWORD_VALIDATOR
-from .services import authenticate_account
+from .services import authenticate_account, revoke_user_refresh_tokens
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
@@ -66,3 +66,31 @@ class RefreshTokenSerializer(serializers.Serializer):
     
     def save(self, **kwargs):
         return self.validated_data.get("new_access_token")
+    
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(max_length=128, required=True, validators=[PASSWORD_VALIDATOR])
+    new_password = serializers.CharField(max_length=128, required=True, validators=[PASSWORD_VALIDATOR])
+    confirm_new_password = serializers.CharField(max_length=128, required=True, validators=[PASSWORD_VALIDATOR])
+
+    def validate(self, data):
+        user = self.context.get("user")
+
+        if not user.check_password(data.get("current_password")):
+            raise serializers.ValidationError("Current password is incorrect")
+        
+        if user.check_password(data.get("new_password")):
+            raise serializers.ValidationError("The new password cannot be the same as your current password")
+        
+        if data.get("confirm_new_password") != data.get("new_password"):
+            raise serializers.ValidationError("Passwords do not match")
+        
+        return data
+    
+    def save(self, **kwargs):
+
+        user = self.context.get("user")
+        user.set_password(self.validated_data.get("new_password"))
+
+        revoke_user_refresh_tokens(user)
+
+        return user.save()

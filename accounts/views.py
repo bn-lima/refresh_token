@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework import status, permissions
-from .serializers import RegisterAccountSerializer, LoginAccountSerializer, RefreshTokenSerializer
+from .serializers import RegisterAccountSerializer, LoginAccountSerializer, RefreshTokenSerializer, ChangePasswordSerializer
 from rest_framework.response import Response
 
 class RegisterAccount(APIView): # View responsável por registrar um usuário
@@ -39,3 +39,14 @@ class RefreshTokenView(APIView):
         new_access_token = serializer.save()
 
         return Response({"new_access_token": new_access_token}, status=status.HTTP_200_OK)
+    
+class ChangePasswordView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+
+        serializer = ChangePasswordSerializer(data=request.data, context={"user": request.user})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
