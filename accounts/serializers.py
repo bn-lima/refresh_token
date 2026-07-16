@@ -52,22 +52,22 @@ class LoginAccountSerializer(serializers.Serializer): # Serializer responsável 
     def save(self, **kwargs): # Devolve token de acesso
         return self.validated_data.get("token_pair")
     
-class RefreshTokenSerializer(serializers.Serializer):
+class RefreshTokenSerializer(serializers.Serializer): # Serializer responsável por gerar um novo token de acesso a partir de um refresh token
     refresh_token = serializers.CharField(required=True)
 
     def validate(self, data):
         try:
-            refresh_token = RefreshToken(data.get("refresh_token"))
+            refresh_token = RefreshToken(data.get("refresh_token")) # Valida o refresh token enviado
         except TokenError:
             raise serializers.ValidationError("Invalid or expired refresh_token")
         
-        data["new_access_token"] = str(refresh_token.access_token)
+        data["new_access_token"] = str(refresh_token.access_token) # Gera um novo token de acesso
         return data
     
     def save(self, **kwargs):
-        return self.validated_data.get("new_access_token")
+        return self.validated_data.get("new_access_token") # Retorna o novo token de acesso
     
-class ChangePasswordSerializer(serializers.Serializer):
+class ChangePasswordSerializer(serializers.Serializer): # Serializer responsável por validar e alterar a senha do usuário
     current_password = serializers.CharField(max_length=128, required=True, validators=[PASSWORD_VALIDATOR])
     new_password = serializers.CharField(max_length=128, required=True, validators=[PASSWORD_VALIDATOR])
     confirm_new_password = serializers.CharField(max_length=128, required=True, validators=[PASSWORD_VALIDATOR])
@@ -75,13 +75,13 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate(self, data):
         user = self.context.get("user")
 
-        if not user.check_password(data.get("current_password")):
+        if not user.check_password(data.get("current_password")): # Verifica se a senha atual está correta
             raise serializers.ValidationError("Current password is incorrect")
         
-        if user.check_password(data.get("new_password")):
+        if user.check_password(data.get("new_password")): # Verifica se a nova senha é diferente da senha atual
             raise serializers.ValidationError("The new password cannot be the same as your current password")
         
-        if data.get("confirm_new_password") != data.get("new_password"):
+        if data.get("confirm_new_password") != data.get("new_password"): # Verifica se as novas senhas são iguais
             raise serializers.ValidationError("Passwords do not match")
         
         return data
@@ -89,8 +89,8 @@ class ChangePasswordSerializer(serializers.Serializer):
     def save(self, **kwargs):
 
         user = self.context.get("user")
-        user.set_password(self.validated_data.get("new_password"))
+        user.set_password(self.validated_data.get("new_password")) # Define a nova senha de forma segura
 
-        revoke_user_refresh_tokens(user)
+        revoke_user_refresh_tokens(user) # Invalida todos os refresh tokens do usuário
 
         return user.save()

@@ -15,9 +15,9 @@ def authenticate_account(username, password): # Verifica se account existe no ba
         "access_token": str(refresh.access_token)
     }
 
-def revoke_user_refresh_tokens(user):
+def revoke_user_refresh_tokens(user): # Invalida todos os refresh tokens do usuário
 
-    tokens = OutstandingToken.objects.filter(user=user)
+    tokens = OutstandingToken.objects.filter(user=user) # Busca todos os refresh tokens registrados do usuário
 
-    for token in tokens:
+    for token in tokens: # Adiciona cada refresh token à blacklist
         BlacklistedToken.objects.get_or_create(token=token)

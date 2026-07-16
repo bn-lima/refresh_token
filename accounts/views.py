@@ -30,7 +30,7 @@ class CheckAuthentication(APIView): # Verifica se o usuário está logado
     def get(self, request, *args, **kwargs):
         return Response({"detail": "You are authenticated!"}, status=status.HTTP_200_OK)
     
-class RefreshTokenView(APIView):
+class RefreshTokenView(APIView): # View responsável por gerar um novo token de acesso a partir de um refresh token
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -40,7 +40,7 @@ class RefreshTokenView(APIView):
 
         return Response({"new_access_token": new_access_token}, status=status.HTTP_200_OK)
     
-class ChangePasswordView(APIView):
+class ChangePasswordView(APIView): # View responsável por alterar a senha do usuário e invalidar os refresh tokens antigos
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
