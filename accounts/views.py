@@ -1,7 +1,6 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import status, permissions
-from .serializers import RegisterAccountSerializer, LoginAccountSerializer
+from .serializers import RegisterAccountSerializer, LoginAccountSerializer, RefreshTokenSerializer, ChangePasswordSerializer
 from rest_framework.response import Response
 
 class RegisterAccount(APIView): # View responsável por registrar um usuário
@@ -21,6 +20,33 @@ class LoginAccount(APIView): # View responsável por logar o usuário
     def post(self, request, *args, **kwargs):
         serializer = LoginAccountSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        access_token = serializer.save()
+        token_pair = serializer.save()
 
-        return Response({"access_token": access_token}, status=status.HTTP_200_OK)
+        return Response({"token_pair": token_pair}, status=status.HTTP_200_OK)
+    
+class CheckAuthentication(APIView): # Verifica se o usuário está logado
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        return Response({"detail": "You are authenticated!"}, status=status.HTTP_200_OK)
+    
+class RefreshTokenView(APIView): # View responsável por gerar um novo token de acesso a partir de um refresh token
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = RefreshTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_access_token = serializer.save()
+
+        return Response({"new_access_token": new_access_token}, status=status.HTTP_200_OK)
+    
+class ChangePasswordView(APIView): # View responsável por alterar a senha do usuário e invalidar os refresh tokens antigos
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+
+        serializer = ChangePasswordSerializer(data=request.data, context={"user": request.user})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)

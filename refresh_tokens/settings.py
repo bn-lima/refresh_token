@@ -1,5 +1,6 @@
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'rest_framework'
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 MIDDLEWARE = [
@@ -137,9 +139,16 @@ AUTH_USER_MODEL = 'accounts.Account'
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES":
-    ["rest_framework.authentication.TokenAuthentication"]
+    ["rest_framework_simplejwt.authentication.JWTAuthentication"]
 }
 
 # Cors
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# JWT
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+}
